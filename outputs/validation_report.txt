@@ -1,0 +1,90 @@
+================================================================================
+DATASET VALIDATION REPORT
+================================================================================
+
+SUMMARY
+--------------------------------------------------------------------------------
+Total files: 3
+Valid files: 3
+Invalid files: 0
+Total errors: 0
+Total warnings: 10
+
+✓ ALL FILES VALID - Dataset is ready for processing
+
+================================================================================
+DETAILED RESULTS
+================================================================================
+
+1. Bhubaneswar_UHI_2025.tif [✓ VALID]
+--------------------------------------------------------------------------------
+  Bands: 10
+  Size: 669x669
+  Data type: float32
+  CRS: EPSG:4326
+
+  WARNINGS:
+    ⚠ Band 'SR_B2' has 0.1% missing data (NaN values)
+    ⚠ Band 'SR_B3' has 0.1% missing data (NaN values)
+    ⚠ Band 'SR_B4' has 0.1% missing data (NaN values)
+    ⚠ Band 'SR_B5' has 0.1% missing data (NaN values)
+    ⚠ Band 'SR_B6' has 0.1% missing data (NaN values)
+    ⚠ Band 'SR_B7' has 0.1% missing data (NaN values)
+    ⚠ Band 'NDVI' has 0.1% missing data (NaN values)
+    ⚠ Band 'NDBI' has 0.1% missing data (NaN values)
+    ⚠ Band 'NDWI' has 0.1% missing data (NaN values)
+    ⚠ Band 'LST' has 0.1% missing data (NaN values)
+
+  BAND STATISTICS:
+    SR_B2: mean=0.04, min=0.02, max=0.23, NaN=669
+    SR_B3: mean=0.08, min=0.04, max=0.31, NaN=669
+    SR_B4: mean=0.08, min=0.02, max=0.36, NaN=669
+    SR_B5: mean=0.24, min=0.05, max=0.50, NaN=669
+    SR_B6: mean=0.21, min=0.02, max=0.57, NaN=669
+    SR_B7: mean=0.13, min=0.01, max=0.55, NaN=669
+    NDVI: mean=0.51, min=-0.15, max=0.86, NaN=669
+    NDBI: mean=-0.09, min=-0.61, max=0.28, NaN=669
+    NDWI: mean=-0.49, min=-0.75, max=0.19, NaN=669
+    LST: mean=32.36, min=26.25, max=42.10, NaN=669
+
+2. Cuttack_UHI_2025.tif [✓ VALID]
+--------------------------------------------------------------------------------
+  Bands: 10
+  Size: 521x483
+  Data type: float32
+  CRS: EPSG:4326
+
+  BAND STATISTICS:
+    SR_B2: mean=0.05, min=0.01, max=0.24, NaN=0
+    SR_B3: mean=0.09, min=0.04, max=0.33, NaN=0
+    SR_B4: mean=0.09, min=0.02, max=0.38, NaN=0
+    SR_B5: mean=0.21, min=0.02, max=0.48, NaN=0
+    SR_B6: mean=0.19, min=0.02, max=0.55, NaN=0
+    SR_B7: mean=0.14, min=0.01, max=0.49, NaN=0
+    NDVI: mean=0.39, min=-0.34, max=0.81, NaN=0
+    NDBI: mean=-0.09, min=-0.58, max=0.27, NaN=0
+    NDWI: mean=-0.36, min=-0.70, max=0.43, NaN=0
+    LST: mean=32.08, min=25.33, max=41.50, NaN=0
+
+3. Berhampur_UHI_2025.tif [✓ VALID]
+--------------------------------------------------------------------------------
+  Bands: 10
+  Size: 669x446
+  Data type: float32
+  CRS: EPSG:4326
+
+  BAND STATISTICS:
+    SR_B2: mean=0.05, min=0.02, max=0.21, NaN=0
+    SR_B3: mean=0.09, min=0.04, max=0.26, NaN=0
+    SR_B4: mean=0.09, min=0.02, max=0.30, NaN=0
+    SR_B5: mean=0.25, min=0.05, max=0.43, NaN=0
+    SR_B6: mean=0.23, min=0.02, max=0.56, NaN=0
+    SR_B7: mean=0.15, min=0.01, max=0.56, NaN=0
+    NDVI: mean=0.46, min=-0.29, max=0.83, NaN=0
+    NDBI: mean=-0.04, min=-0.61, max=0.24, NaN=0
+    NDWI: mean=-0.46, min=-0.73, max=0.23, NaN=0
+    LST: mean=33.82, min=26.67, max=42.84, NaN=0
+
+================================================================================
+END OF REPORT
+================================================================================

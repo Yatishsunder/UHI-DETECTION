@@ -1,0 +1,256 @@
+# ============================================================================
+# Urban Heat Island Detection: Configuration File
+# ============================================================================
+# All project parameters are defined here. Do not hardcode values in code.
+# Use src.config module to load these settings programmatically.
+# ============================================================================
+
+# ============================================================================
+# Data Directories
+# ============================================================================
+data:
+  # Raw GeoTIFF exports from Google Earth Engine
+  raw_dir: "./data/raw"
+  
+  # Processed datasets (cleaned, normalized)
+  processed_dir: "./data/processed"
+  
+  # Train/validation/test splits
+  splits_dir: "./data/splits"
+  
+  # Temporary files and logs
+  temp_dir: "./data/temp"
+
+  # Only these three flat-folder exports are in the study scope.
+  expected_files:
+    - "Bhubaneswar_UHI_2025.tif"
+    - "Cuttack_UHI_2025.tif"
+    - "Berhampur_UHI_2025.tif"
+
+# ============================================================================
+# City Information (3 Odisha Study Cities)
+# ============================================================================
+cities:
+  - name: "Bhubaneswar"
+    coordinates: [20.2961, 85.8245]  # [latitude, longitude]
+    bounds: [20.1, 85.7, 20.5, 85.9]  # [min_lat, min_lon, max_lat, max_lon]
+    description: "State capital of Odisha, largest urban area"
+    
+  - name: "Cuttack"
+    coordinates: [20.4861, 85.9042]
+    bounds: [20.3, 85.8, 20.7, 86.0]
+    description: "Second largest city, administrative center"
+    
+  - name: "Berhampur"
+    coordinates: [19.3150, 84.7941]
+    bounds: [19.15, 84.6, 19.5, 84.95]
+    description: "Coastal city in southern Odisha"
+    
+
+# ============================================================================
+# Satellite Data Configuration
+# ============================================================================
+satellite:
+  # Landsat collections used in analysis
+  collections:
+    - "LANDSAT/LC08/C02/T1_L2"  # Landsat 8 Collection 2 Level 2
+    - "LANDSAT/LC09/C02/T1_L2"  # Landsat 9 Collection 2 Level 2
+  
+  # Processing spatial resolution
+  scale_meters: 30  # Landsat native resolution
+  
+  # CRS used by the current exports
+  crs: "EPSG:4326"
+  
+  # Expected spectral bands from Google Earth Engine export
+  expected_bands:
+    - "SR_B2"   # Coastal/Aerosol (blue)
+    - "SR_B3"   # Blue
+    - "SR_B4"   # Red
+    - "SR_B5"   # NIR (near-infrared)
+    - "SR_B6"   # SWIR1 (short-wave infrared 1)
+    - "SR_B7"   # SWIR2 (short-wave infrared 2)
+    - "NDVI"    # Normalized Difference Vegetation Index
+    - "NDBI"    # Normalized Difference Built-up Index
+    - "NDWI"    # Normalized Difference Water Index
+    - "LST"     # Land Surface Temperature (Celsius)
+  
+  # All exported bands should be in this dtype
+  expected_dtype: "float32"
+
+# ============================================================================
+# Cloud Masking & Quality Control
+# ============================================================================
+processing:
+  # Maximum fraction of pixels allowed to be cloud/shadow (0.0 to 1.0)
+  cloud_threshold: 0.1
+  
+  # Minimum fraction of valid (non-nodata) pixels required
+  valid_pixel_threshold: 0.9
+  
+  # Landsat QA_PIXEL bit flag for cloud detection
+  # (handled by Google Earth Engine; documented for reference)
+  qa_cloud_bits: [3, 4, 5]  # Cloud, cloud confidence, cirrus confidence
+  
+  # Valid ranges for quality checks (helps catch errors)
+  valid_ranges:
+    LST:      [-50, 70]      # Temperature in Celsius
+    NDVI:     [-1, 1]        # NDVI always in [-1, 1]
+    NDBI:     [-1, 1]        # NDBI always in [-1, 1]
+    NDWI:     [-1, 1]        # NDWI always in [-1, 1]
+    SR_B2:    [0, 1]         # Surface reflectance (already scaled)
+    SR_B3:    [0, 1]
+    SR_B4:    [0, 1]
+    SR_B5:    [0, 1]
+    SR_B6:    [0, 1]
+    SR_B7:    [0, 1]
+
+# ============================================================================
+# UHI Detection Baseline
+# ============================================================================
+uhi:
+  # UHI baseline: Mean LST + 1 standard deviation (from background areas)
+  # Pixels exceeding baseline are flagged as UHI
+  baseline_method: "mean_plus_1std"  # Can be extended to other methods
+  
+  # Background area definition (non-urban pixels for baseline calculation)
+  # NDBI < 0.1 typically indicates non-built-up areas
+  background_ndbi_threshold: 0.1
+
+# ============================================================================
+# Feature Engineering (Preprocessing)
+# ============================================================================
+preprocessing:
+  # Spatial patch configuration
+  patch_size: 128             # Pixels (128×128 patches at 30m = 3.84 km)
+  patch_stride: 64            # Overlap: stride < patch_size
+  
+  # Temporal sequence configuration
+  sequence_length: 6          # Number of time steps per sequence
+  sequence_gap_days: 16       # Days between Landsat passes (~16 days)
+  
+  # Feature normalization
+  normalization_method: "standardization"  # Options: standardization, minmax
+  
+  # Missing value handling
+  missing_value_method: "forward_fill"  # Options: forward_fill, interpolate, drop
+
+# ============================================================================
+# Train/Validation/Test Split
+# ============================================================================
+dataset_split:
+  train_fraction: 0.70
+  validation_fraction: 0.15
+  test_fraction: 0.15
+  
+  # Random seed for reproducibility
+  random_seed: 42
+  
+  # Temporal leakage prevention:
+  # Test set uses later dates than training to simulate real-world forecast
+  temporal_aware_split: true
+  test_date_offset_months: 12  # Test data is 12 months after training
+
+# ============================================================================
+# Model Hyperparameters (for future deep learning phase)
+# ============================================================================
+model:
+  # CNN for feature extraction and temperature prediction
+  cnn:
+    name: "CNN_Temperature"
+    input_channels: 10        # Number of input bands
+    hidden_channels: [64, 128, 256]
+    output_size: 1            # Single pixel temperature output
+    kernel_size: 3
+    activation: "relu"
+  
+  # U-Net for UHI segmentation (binary classification)
+  unet:
+    name: "UNet_UHI_Segmentation"
+    input_channels: 10
+    num_classes: 2            # UHI / Non-UHI
+    depth: 4                  # Number of encoder/decoder blocks
+    filters_base: 64          # Base filter count
+  
+  # ConvLSTM for spatiotemporal prediction
+  convlstm:
+    name: "ConvLSTM_SpatioTemporal"
+    input_channels: 10
+    hidden_channels: [64, 128]
+    num_layers: 2
+    kernel_size: 3
+    dropout: 0.2
+
+# ============================================================================
+# Training Configuration (for future training phase)
+# ============================================================================
+training:
+  # Optimization
+  optimizer: "adam"
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  
+  # Training loop
+  epochs: 50
+  batch_size: 32
+  validation_split: 0.15
+  
+  # Callbacks
+  early_stopping_patience: 5  # Epochs without improvement before stopping
+  checkpoint_save_best_only: true
+  
+  # Data augmentation
+  augmentation_enabled: true
+  augment_rotation: true
+  augment_flip: true
+  augment_noise: 0.01
+
+# ============================================================================
+# Evaluation Metrics
+# ============================================================================
+evaluation:
+  # Temperature prediction metrics
+  regression_metrics:
+    - "mae"           # Mean Absolute Error
+    - "rmse"          # Root Mean Squared Error
+    - "r2"            # R² score
+    - "mape"          # Mean Absolute Percentage Error (optional)
+  
+  # UHI segmentation metrics
+  segmentation_metrics:
+    - "precision"
+    - "recall"
+    - "f1"
+    - "iou"           # Intersection over Union
+    - "confusion_matrix"
+
+# ============================================================================
+# Logging & Output
+# ============================================================================
+logging:
+  level: "INFO"              # Options: DEBUG, INFO, WARNING, ERROR
+  log_file: "./data/temp/project.log"
+  console_output: true
+  
+output:
+  # Prediction maps and visualizations
+  prediction_maps_dir: "./data/processed/predictions"
+  
+  # Evaluation reports
+  report_dir: "./data/processed/reports"
+  
+  # Model checkpoints
+  checkpoint_dir: "./data/processed/models"
+
+# ============================================================================
+# Validation & QA Checks (for early detection of data issues)
+# ============================================================================
+quality_assurance:
+  # Generate validation report on startup
+  auto_validate_on_load: true
+  
+  # Save validation report to file
+  validation_report_dir: "./data/processed/validation_reports"
+  
+  # Stop execution if critical issues found
+  fail_on_critical_error: true
